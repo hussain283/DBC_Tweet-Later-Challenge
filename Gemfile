@@ -18,6 +18,8 @@ gem 'shotgun'
 
 gem 'oauth'
 gem 'twitter'
+gem 'sidekiq'
+gem 'redis'
 
 gem "debugger", "~> 1.6.1"
 

@@ -17,27 +17,20 @@ get '/auth' do
   @access_token = request_token.get_access_token(:oauth_verifier => params[:oauth_verifier])
   # our request token is only valid until we use it to get an access token, so let's delete it from our session
   session.delete(:request_token)
-
   @user = User.find_by_screen_name(@access_token.params[:screen_name])
-
-  unless @user
-    @user = User.create(screen_name: @access_token.params[:screen_name],
-                        oauth_token: @access_token.token,
-                        oauth_secret: @access_token.secret)
-  end
+  @user = User.create(screen_name: @access_token.params[:screen_name], oauth_token: @access_token.token, oauth_secret: @access_token.secret) unless @user
   session[:user_id] = @user.id
-
-  erb :index
-  
+  redirect "/"
 end
 
 post '/tweet' do
+  current_user.tweet(params[:content])
+end
 
-  client = Twitter::Client.new(
-    :oauth_token => current_user.oauth_token,
-    :oauth_token_secret => current_user.oauth_secret)
-
-  client.update(params[:content])
-
-  
+get '/status/:job_id' do
+  if job_is_complete(params[:job_id])
+    "Complete"
+  else
+    "Incomplete"
+  end
 end

@@ -5,25 +5,38 @@ $(document).ready(function() {
 
   // See: http://docs.jquery.com/Tutorials:Introducing_$(document).ready()
 
-   $('#tweet_form').on('submit',function(e){
+  $('#tweet_form').on('submit',function(e){
     e.preventDefault();
     var data = $(this).serialize();
 
 
     $('#tweet_form input').attr('disabled','disabled');
     $('#loader').fadeIn();
-    $('#loader p').text("Tweeting!!")
 
     console.log(data);
     $.ajax({
       url: '/tweet',
       type: 'post',
       data: data
-    }).done(function(){
-      $('#loader p').text("Success!")
-      $('#loader').fadeOut();
-      $('#tweet_form input').removeAttr('disabled');
-      $('#tweet_form textarea').val("");
+    }).done(function(data){
+      console.log('jobid:',data);
+
+      var intervalId = setInterval(function(){
+        $.ajax({
+          url: '/status/' + data,
+          type: 'get'
+        }).done(function(complete){
+          console.log(complete);
+          if (complete == "Complete") {
+            clearInterval(intervalId);
+            $('#loader').fadeOut();
+            $('#tweet_form input').removeAttr('disabled');
+            $('#tweet_form textarea').val("");
+          }
+        });
+
+      },3000);
+
     });
   });
 
